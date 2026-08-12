@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-3xl p-8 shadow-sm border space-y-6">
+        <div class="flex justify-between items-center border-b pb-4">
+            <h1 class="text-2xl font-bold text-gray-900">Admin Panel - Simamia Arifa</h1>
+            <a href="/" class="text-indigo-600 text-sm font-semibold hover:underline">Rudi Website</a>
+        </div>
+
+        <!-- Form ya Kuweka Arifa -->
+        <form id="adminForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Kichwa cha Arifa</label>
+                <input type="text" id="admTitle" required class="w-full border rounded-xl px-4 py-2.5 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Ujumbe</label>
+                <textarea id="admMessage" rows="3" required class="w-full border rounded-xl px-4 py-2.5 text-sm"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">Chapisha Arifa</button>
+        </form>
+
+        <!-- Orodha ya Arifa za Kufuta -->
+        <div>
+            <h3 class="font-bold text-lg mb-3">Arifa Zilizopo (Bofya kufuta)</h3>
+            <div id="adminNotifList" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchAdminNotifs() {
+            const res = await fetch('/api/notifications');
+            const data = await res.json();
+            const list = document.getElementById('adminNotifList');
+            list.innerHTML = '';
+            if(data.success) {
+                data.notifications.forEach(n => {
+                    list.innerHTML += `
+                        <div class="flex justify-between items-center p-3 bg-gray-50 border rounded-xl">
+                            <div>
+                                <h4 class="font-bold text-sm">${n.title}</h4>
+                                <p class="text-xs text-gray-500">${n.message}</p>
+                            </div>
+                            <button onclick="deleteNotif(${n.id})" class="text-red-500 hover:text-red-700 text-base p-2"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                });
+            }
+        }
+        fetchAdminNotifs();
+
+        document.getElementById('adminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('admTitle').value;
+            const message = document.getElementById('admMessage').value;
+
+            const res = await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, message })
+            });
+            if(res.ok) {
+                document.getElementById('admTitle').value = '';
+                document.getElementById('admMessage').value = '';
+                fetchAdminNotifs();
+                alert("Arifa imetumwa!");
+            }
+        });
+
+        async function deleteNotif(id) {
+            const res = await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+            if(res.ok) {
+                fetchAdminNotifs();
+            }
+        }
+    </script>
+</body>
+</html>
+
