@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-indigo-600"><i class="fa-solid fa-globe"></i> My Platform</h1>
+        <div class="relative">
+            <button id="bellBtn" class="text-xl text-gray-600 hover:text-indigo-600 relative">
+                <i class="fa-regular fa-bell"></i>
+                <span id="notifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center hidden">0</span>
+            </button>
+            <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white border rounded-2xl shadow-xl p-4 z-50 space-y-2">
+                <h3 class="font-bold text-sm text-gray-700 border-b pb-2">Arifa Mpya</h3>
+                <div id="notifContainer" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-6 py-12 space-y-12">
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900">Huduma na Malipo</h2>
+            <p class="text-gray-500 mt-2">Fanya malipo kulingana na bei zilizowekwa kwenye mfumo wa admin.</p>
+        </div>
+
+        <!-- Sehemu Halisi ya Bei (Zinazotoka Admin) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl border shadow-sm text-center space-y-3">
+                <h3 class="font-bold text-lg text-gray-700">Huduma ya Kawaida (Basic)</h3>
+                <p id="displayBasicPrice" class="text-2xl font-extrabold text-indigo-600">Inapakia...</p>
+                <button onclick="selectPrice(document.getElementById('basicPriceVal').innerText)" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-100">Chagua Hii</button>
+                <span id="basicPriceVal" class="hidden">5000</span>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border shadow-sm text-center space-y-3">
+                <h3 class="font-bold text-lg text-gray-700">Huduma Maalum (VIP)</h3>
+                <p id="displayVipPrice" class="text-2xl font-extrabold text-indigo-600">Inapakia...</p>
+                <button onclick="selectPrice(document.getElementById('vipPriceVal').innerText)" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-100">Chagua Hii</button>
+                <span id="vipPriceVal" class="hidden">15000</span>
+            </div>
+        </div>
+
+        <!-- HarakaPay Form -->
+        <div class="bg-white max-w-md mx-auto rounded-3xl p-8 border shadow-sm">
+            <h3 class="font-bold text-xl text-center mb-4">Lipa Kupitia HarakaPay</h3>
+            <form id="payForm" class="space-y-4">
+                <input type="number" id="payAmount" placeholder="Kiasi (Tsh)" required class="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <input type="text" id="payPhone" placeholder="Namba ya Simu (07xxxxxxxx)" required class="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">Thibitisha Malipo</button>
+            </form>
+            <div id="payStatus" class="text-center text-sm mt-3 font-medium"></div>
+        </div>
+    </main>
+
+    <!-- AI Chat Widget -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="chatToggleBtn" class="bg-indigo-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl hover:scale-105 transition">
+            <i class="fa-solid fa-comment-dots"></i>
+        </button>
+
+        <div id="chatBox" class="hidden absolute bottom-16 right-0 w-80 bg-white border rounded-3xl shadow-2xl overflow-hidden flex flex-col h-96">
+            <div class="bg-indigo-600 text-white p-4 font-bold flex justify-between items-center">
+                <span>Ongea na AI Assistant</span>
+                <button id="closeChat" class="text-white hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm bg-gray-50">
+                <div class="bg-indigo-100 text-indigo-900 p-3 rounded-2xl max-w-[80%]">Habari! Nikusaidie nini leo?</div>
+            </div>
+            <form id="chatForm" class="p-3 bg-white border-t flex gap-2">
+                <input type="text" id="chatInput" placeholder="Andika ujumbe wako..." required class="flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-indigo-700"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 1. Pakia Bei kutoka Admin/Seva
+        async function loadPrices() {
+            try {
+                const res = await fetch('/api/admin/prices');
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('displayBasicPrice').innerText = data.prices.basicPrice + ' Tsh';
+                    document.getElementById('basicPriceVal').innerText = data.prices.basicPrice;
+                    document.getElementById('displayVipPrice').innerText = data.prices.vipPrice + ' Tsh';
+                    document.getElementById('vipPriceVal').innerText = data.prices.vipPrice;
+                }
+            } catch(e) { console.error(e); }
+        }
+        loadPrices();
+
+        function selectPrice(val) {
+            document.getElementById('payAmount').value = val;
+        }
+
+        // 2. Pakia Arifa
+        async function loadNotifications() {
+            try {
+                const res = await fetch('/api/notifications');
+                const data = await res.json();
+                if(data.success) {
+                    const container = document.getElementById('notifContainer');
+                    const badge = document.getElementById('notifBadge');
+                    container.innerHTML = '';
+                    if(data.notifications.length > 0) {
+                        badge.classList.remove('hidden');
+                        badge.innerText = data.notifications.length;
+                        data.notifications.forEach(n => {
+                            container.innerHTML += `<div class="p-2 bg-gray-50 rounded border"><b>${n.title}</b><p>${n.message}</p></div>`;
+                        });
+                    }
+                }
+            } catch(e) { console.error(e); }
+        }
+        loadNotifications();
+
+        document.getElementById('bellBtn').addEventListener('click', () => {
+            document.getElementById('notifDropdown').classList.toggle('hidden');
+        });
+
+        // 3. HarakaPay Submit
+        document.getElementById('payForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = document.getElementById('payAmount').value;
+            const phone = document.getElementById('payPhone').value;
+            const status = document.getElementById('payStatus');
+
+            status.innerHTML = '<span class="text-indigo-600">Inatuma ombi la malipo kwenye simu...</span>';
+
+            try {
+                const res = await fetch('/api/payments/collect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, amount })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    status.innerHTML = '<span class="text-green-600">Weka namba ya siri kwenye simu yako kukamilisha malipo!</span>';
+                } else {
+                    status.innerHTML = `<span class="text-red-500">${data.error || 'Imeshindikana kuanzisha malipo.'}</span>`;
+                }
+            } catch(err) {
+                status.innerHTML = '<span class="text-red-500">Hitilafu ya mtandao.</span>';
+            }
+        });
+
+        // 4. AI Chat Widget Script
+        const chatToggleBtn = document.getElementById('chatToggleBtn');
+        const chatBox = document.getElementById('chatBox');
+        const closeChat = document.getElementById('closeChat');
+
+        chatToggleBtn.addEventListener('click', () => chatBox.classList.toggle('hidden'));
+        closeChat.addEventListener('click', () => chatBox.classList.add('hidden'));
+
+        document.getElementById('chatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const messages = document.getElementById('chatMessages');
+            const prompt = input.value;
+
+            messages.innerHTML += `<div class="bg-indigo-600 text-white p-3 rounded-2xl max-w-[80%] ml-auto">${prompt}</div>`;
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+
+            try {
+                const res = await fetch('/api/ai/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    messages.innerHTML += `<div class="bg-white border text-gray-800 p-3 rounded-2xl max-w-[80%]">${data.reply}</div>`;
+                } else {
+                    messages.innerHTML += `<div class="bg-red-100 text-red-600 p-3 rounded-2xl max-w-[80%]">${data.error || 'Samahani, kosa limetokea.'}</div>`;
+                }
+            } catch(err) {
+                messages.innerHTML += `<div class="bg-red-100 text-red-600 p-3 rounded-2xl max-w-[80%]">Hitilafu ya mtandao.</div>`;
+            }
+            messages.scrollTop = messages.scrollHeight;
+        });
+    </script>
+</body>
+</html>
+
