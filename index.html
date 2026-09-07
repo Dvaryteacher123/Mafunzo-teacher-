@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Auth - Login & Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            color: #333;
+        }
+        .auth-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+        .auth-container h3 {
+            margin-top: 0;
+            color: #444;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-signup {
+            background-color: #28a745;
+        }
+        .btn-signup:hover {
+            background-color: #218838;
+        }
+        .btn-login {
+            background-color: #007bff;
+        }
+        .btn-login:hover {
+            background-color: #0056b3;
+        }
+        .btn-google {
+            background-color: #4285F4;
+            margin-top: 10px;
+        }
+        .btn-google:hover {
+            background-color: #357ae8;
+        }
+        #error-msg {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Mfumo wa Supabase Auth</h2>
+
+    <!-- Sehemu ya Kusajili (Sign Up) -->
+    <div class="auth-container">
+        <h3>Jisajili (Sign Up)</h3>
+        <input type="email" id="signup-email" placeholder="Weka Email">
+        <input type="password" id="signup-password" placeholder="Weka Password">
+        <button class="btn-signup" id="signup-btn">Jisajili</button>
+    </div>
+
+    <!-- Sehemu ya Kuingia (Login) -->
+    <div class="auth-container">
+        <h3>Ingia (Login)</h3>
+        <input type="email" id="login-email" placeholder="Weka Email">
+        <input type="password" id="login-password" placeholder="Weka Password">
+        <button class="btn-login" id="login-btn">Ingia</button>
+        
+        <!-- Kitufe cha Google Login -->
+        <button class="btn-google" id="google-login-btn">Ingia na Google</button>
+    </div>
+
+    <div id="error-msg"></div>
+
+    <!-- Kuunganisha Supabase SDK na faili letu la client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+
+    <script>
+        const errorDiv = document.getElementById('error-msg');
+
+        // Kitendo cha Kusajili
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            errorDiv.textContent = '';
+
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                errorDiv.textContent = error.message;
+            } else {
+                alert('Umejisajili kwa mafanikio! Sasa unaweza kuingia.');
+            }
+        });
+
+        // Kitendo cha Kuingia (Login)
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            errorDiv.textContent = '';
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                errorDiv.textContent = error.message;
+            } else {
+                // Ikifanikiwa, inakupeleka kwenye ukurasa wa dashboard
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // Kitendo cha Kuingia na Google
+        document.getElementById('google-login-btn').addEventListener('click', async () => {
+            errorDiv.textContent = '';
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+            });
+            
+            if (error) {
+                errorDiv.textContent = 'Imeshindikana kuingia na Google: ' + error.message;
+            }
+        });
+    </script>
+
+</body>
+</html>
+
